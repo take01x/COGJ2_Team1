@@ -1,8 +1,10 @@
 
 [About The Licenses of External Codes]
 
+-----------------------------------------------------
 C# Synth Project
 MIT licence
+
 https://csharpsynthproject.codeplex.com/license
 
 Copyright (c) 2011 Copyright Holders
@@ -23,3 +25,8 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMA
 WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+-----------------------------------------------------
+Google VR SDK
+Apache License ver.2
+
+unity_client/Assets/GoogleVR/LICENSE
