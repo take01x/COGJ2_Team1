@@ -3,17 +3,16 @@ using System.Collections;
 
 public class MeshRendererSetting : MonoBehaviour {
 
+    [SerializeField]
+    string layerName = "UI";
+
 	// Use this for initialization
 	void Start () {
         MeshRenderer rend = GetComponent<MeshRenderer>();
-        if (rend)
+        if (rend != null)  
         {
-            rend.sortingLayerName = "UI";
+            rend.sortingLayerName = layerName;
         }
     }
 
-    // Update is called once per frame
-    void Update () {
-	
-	}
 }

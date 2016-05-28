@@ -34,15 +34,6 @@ public class cube : MonoBehaviour, IGvrGazeResponder {
 	// Use this for initialization
 	void Start () {
 
-		MeshRenderer rend = GetComponent<MeshRenderer>();
-        if(rend != null)
-        {
-            rend = GetComponentInChildren<MeshRenderer>();
-        }
-        if (rend)
-        {
-            rend.sortingLayerName = "UI";
-        }
 		this.initialPoint = transform.position;
         defaltY = transform.rotation.y;
         updateSpeed();
