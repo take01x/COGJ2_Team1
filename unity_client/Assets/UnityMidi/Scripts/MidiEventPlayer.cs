@@ -10,60 +10,45 @@ using System.Collections.Generic;
 using UnityMidi;
 
 
-
-//    [RequireComponent(typeof(AudioSource))]
+[RequireComponent(typeof(AudioSource))]
 public class MidiEventPlayer : MonoBehaviour
 {
-
-    public enum JudgeType{
-        Perfect = 0,
-        Great   = 1,
-        Good    = 2,
-        Miss    = 3
-    }
-
-
-
+    // 判定ごとのジャッジタイミング
     [System.Serializable]
     public struct JudgeTiming {
         public float perfect;
         public float great;
         public float good;
     }
-
     [SerializeField]
     JudgeTiming judgeTiming;
 
-//        [SerializeField]
-//        StreamingAssetResouce bankSource;
-
+    // midiデータ
     [SerializeField]
     public StreamingAssetResouce midiSource;
 
-//    [SerializeField]
-//    public AudioClip[]
-
+    // Awakeでオートロード
     [SerializeField]
     bool loadOnAwake = false;
 
+    // Awakeでオートプレイ
     [SerializeField]
     bool playOnAwake = false;
 
-//    [SerializeField]
+    // オートプレイフラグ(基本デバッグ用)
     public bool autoPlayMode = false;
 
-//    [SerializeField]
-//    NotesManager notesManager = null;
 
-//    [SerializeField]
-//    GameObject judgeEffect = null;
-
+    // AudioSourceの時間を基準に判定を走らせる場合は true
+    // falseにすると、Unityの内部時間で判定する
     [SerializeField]
     bool isAudioSourceTimer = true;
 
+    // ジャッジ時の一律オフセット
     [SerializeField]
     float timeOffset = 0.0f;
 
+    // コールバック類
 
     public delegate void OnAddCombo();
     private OnAddCombo add_combo_callback;
@@ -107,46 +92,40 @@ public class MidiEventPlayer : MonoBehaviour
 		miss_callback += _callback;
 	}
 
-    DebugPlayerUI debugUi = null;
+    // デバッグ用
+    private DebugPlayerUI debugUi = null;
 
-    bool start = false;
-
-//    public NotesManager notesManaer = null;
+    private bool start = false;
 
 
-    int combo = 0;
-
-    //        [SerializeField]
-    //        int channel = 1;
-    //        [SerializeField]
-    //        int sampleRate = 44100;
-    //        [SerializeField]
-    //        int bufferSize = 1024;
-    //        PatchBank bank;
-    MidiFile midi;
-    //        Synthesizer synthesizer;
-//        AudioSource audioSource;
     MidiEventSequencer sequencer;
-//        int bufferHead;
-//        float[] currentBuffer;
 
-//        public AudioSource AudioSource { get { return audioSource; } }
+    public MidiEventSequencer Sequencer {
+        get { return sequencer; }
+    }
 
-    public MidiEventSequencer Sequencer { get { return sequencer; } }
+    MidiFile midi;
 
-    //        public PatchBank Bank { get { return bank; } }
-
-    public MidiFile MidiFile { get { return midi; } }
-
+    public MidiFile MidiFile {
+        get { return midi; }
+    }
 
     private AudioSource audioSource = null;
 
+    private bool isLoading;
 
+    public bool IsLoading
+    {
+        get { return isLoading; }
+    }
+
+    // シングルトン化
     static public MidiEventPlayer instance = null;
     static public MidiEventPlayer getInstance
     {
         get{ return instance; }
     }
+
 
     MidiEventPlayer()
     {
@@ -154,22 +133,24 @@ public class MidiEventPlayer : MonoBehaviour
         instance = this;
     }
 
-    public void Awake()
+    void OnDestroy()
     {
-        instance = this;
-        //            synthesizer = new Synthesizer(sampleRate, channel, bufferSize, 1);
-        //            sequencer = new MidiFileSequencer(synthesizer);
+        instance = null;
+    }
 
+    void Awake()
+    {
         start = false;
         debugUi = GetComponent<DebugPlayerUI>();
         audioSource = GetComponent<AudioSource>();
 
         sequencer = new MidiEventSequencer();
-//            audioSource = GetComponent<AudioSource>();
+
+        // for Android
+        midiSource.InitializeFileCopy();
 
         if (loadOnAwake)
         {
-            //                LoadBank(new PatchBank(bankSource));
             LoadMidi(new MidiFile(midiSource));
         }
 
@@ -179,19 +160,8 @@ public class MidiEventPlayer : MonoBehaviour
         }
     }
 
-    //        public void LoadBank(PatchBank bank)
-    //        {
-    //            this.bank = bank;
-    //            synthesizer.UnloadBank();
-    //            synthesizer.LoadBank(bank);
-    //        }
 
-    private bool isLoading;
 
-    public bool IsLoading
-    {
-        get { return isLoading; }
-    }
 
     public void Load(int index)
     {
@@ -214,7 +184,6 @@ public class MidiEventPlayer : MonoBehaviour
 
     public void Play()
     {
-        combo = 0;
         isLoading = false;
         audioSource.Play();
         sequencer.Play();
@@ -224,7 +193,7 @@ public class MidiEventPlayer : MonoBehaviour
 
     public bool IsFinished()
     {
-        return !audioSource.isPlaying && sequencer.IsEventFinished;
+        return ! audioSource.isPlaying && sequencer.IsEventFinished;
     }
 
     void FixedUpdate()
@@ -316,7 +285,7 @@ public class MidiEventPlayer : MonoBehaviour
     bool Judge(MidiMessage message)
     {
             
-        var timer = sequencer.CurrentTime;
+        var timer = sequencer.CurrentTime + timeOffset;
         var delta = (timer - message.time);
 //           Debug.Log("Judged. " + timer);
 
@@ -358,7 +327,6 @@ public class MidiEventPlayer : MonoBehaviour
     {
         Debug.Log("Miss.");
 
-        combo = 0;
         reset_combo_callback();
 		miss_callback();
 
@@ -372,7 +340,6 @@ public class MidiEventPlayer : MonoBehaviour
     {
         Debug.Log("Good.");
 
-        combo++;
         add_combo_callback();
         good_callback();
 
@@ -386,7 +353,6 @@ public class MidiEventPlayer : MonoBehaviour
     {
         Debug.Log("Great.");
 
-        combo++;
         add_combo_callback();
         great_callback();
 
@@ -400,7 +366,6 @@ public class MidiEventPlayer : MonoBehaviour
     {
         Debug.Log("Perfect.");
 
-        combo++;
         add_combo_callback();
         perfect_callback();
 

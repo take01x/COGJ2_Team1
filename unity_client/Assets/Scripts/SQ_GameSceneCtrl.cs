@@ -442,6 +442,7 @@ public class SQ_GameSceneCtrl : MonoBehaviour
 	///--------------------------------
 	private void ModeChange( MODE mode )
 	{
+        Debug.Log("ModeChange: " + m_Mode.ToString() + " -> " + mode.ToString());
 		m_Mode = mode;
 	}
 

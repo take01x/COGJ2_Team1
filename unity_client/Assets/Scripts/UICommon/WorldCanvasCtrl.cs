@@ -33,7 +33,7 @@ public class WorldCanvasCtrl : MonoBehaviour {
 		StaticAccess.m_WorldCanvas = this;
 	}
 
-	void Update()
+	void FixedUpdate()
 	{
 		gameObject.transform.position = ( m_SelfCamera.transform.forward * DISTANCE_CAMERA ) + Vector3.up;
 		gameObject.transform.LookAt( m_SelfCamera.transform );
